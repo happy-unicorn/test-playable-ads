@@ -10,7 +10,7 @@ const app = new Application({
 });
 
 let austin, logo, continueButton, overlay, hammer, menu, state, background, gameScene, finalScene, previousIndex;
-let stairs = [], menu_items = [], direction = 1;
+let stairs = [], menu_items = [], decorations = [], direction = 1;
 
 app.loader.add('images/homescapes.json').add('final', 'images/background_final.png').load(setup);
 
@@ -23,13 +23,36 @@ function setup(loader, resources) {
   background = new Sprite(textures['background.png']);
   gameScene.addChild(background);
 
+  let table = new Sprite(textures['table.png']);
+  table.position.set(gameScene.width / 6, gameScene.height / 4);
+  gameScene.addChild(table);
+  let sofa = new Sprite(textures['sofa.png']);
+  sofa.position.set(gameScene.width / 6, gameScene.height / 2);
+  gameScene.addChild(sofa);
+  let globe = new Sprite(textures['globe.png']);
+  globe.position.set(gameScene.width / 12, gameScene.height / 6);
+  gameScene.addChild(globe);
+  let book = new Sprite(textures['book.png']);
+  book.position.set(gameScene.width *  3 / 5, 0);
+  gameScene.addChild(book);
+  let plant_1 = new Sprite(textures['plant_1.png']);
+  plant_1.anchor.set(1, 1);
+  plant_1.position.set(gameScene.width, gameScene.height);
+  gameScene.addChild(plant_1);
+  let plant_2 = new Sprite(textures['plant_2.png']);
+  plant_2.position.set(gameScene.width / 3, 0);
+  gameScene.addChild(plant_2);
+  let plant_3 = new Sprite(textures['plant_3.png']);
+  plant_3.position.set(gameScene.width * 4 / 5, gameScene.height / 3);
+  gameScene.addChild(plant_3);
+
   austin = new Sprite(textures['austin.png']);
   austin.anchor.set(0.5, 0.5);
   austin.position.set(gameScene.width - 500, gameScene.height / 2);
   gameScene.addChild(austin);
 
-  let names = ['old', 'new_1', 'new_2', 'new_3'];
-  for (let name of names) {
+  let names_of_stairs = ['old', 'new_1', 'new_2', 'new_3'];
+  for (let name of names_of_stairs) {
     let stair = new Sprite(textures[`stair_${name}.png`]);
     stair.visible = name === 'old';
     stair.anchor.set(0.5, 0.5);
@@ -39,6 +62,8 @@ function setup(loader, resources) {
     stairs.push(stair);
     gameScene.addChild(stair);
   }
+
+  gameScene.addChild(plant_1);
 
   menu = new Container();
   menu.visible = false;
@@ -105,12 +130,18 @@ function setup(loader, resources) {
   overlay.addChild(continueButton);
 
   logo = new Sprite(textures['logo.png']);
+  logo.visible = false;
+  logo.alpha = 0;
   logo.position.set(30, 30);
   overlay.addChild(logo);
 
   setTimeout(() => {
     hammer.visible = true;
   }, 1000);
+
+  setTimeout(() => {
+    logo.visible = true;
+  }, 300);
 
   setInterval(() => {
     direction *= -1;
@@ -128,6 +159,10 @@ const play = (delta) => {
   if (hammer.visible && hammer.alpha < 1) {
     hammer.alpha += easeOutQuad(hammerAnimationProgress);
     hammerAnimationProgress += 0.01;
+  }
+
+  if (logo.visible && logo.alpha < 1) {
+    logo.alpha += 0.05;
   }
 
   if (menu.visible) {
