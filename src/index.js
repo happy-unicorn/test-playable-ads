@@ -122,9 +122,12 @@ function setup(loader, resources) {
   });
 }
 
+let hammerAnimationProgress = 0;
+
 const play = (delta) => {
   if (hammer.visible && hammer.alpha < 1) {
-    hammer.alpha += 0.1;
+    hammer.alpha += easeOutQuad(hammerAnimationProgress);
+    hammerAnimationProgress += 0.01;
   }
 
   if (menu.visible) {
@@ -190,6 +193,10 @@ const onClickMenu = (currentIndex) => (event) => {
 const onClickOk = (event) => {
   menu.visible = false;
   state = end;
+};
+
+const easeOutQuad = (x) => {
+  return 1 - (1 - x) * (1 - x);
 };
 
 document.body.appendChild(app.view);
