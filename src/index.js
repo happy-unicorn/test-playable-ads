@@ -10,6 +10,8 @@ const app = new Application({
 });
 
 let austin, logo, continueButton, overlay, hammer, menu, stairs, state, background, gameScene, finalScene;
+let current = null, previous = null;
+let direction = 1;
 
 app.loader.add('images/homescapes.json').add('final', 'images/background_final.png').load(setup);
 
@@ -35,6 +37,8 @@ function setup(loader, resources) {
     stair.visible = name === 'old';
     stair.anchor.set(0.5, 0.5);
     stair.position.set(gameScene.width - stair.width / 2, gameScene.height - stair.height / 2);
+    stair.vx = 0;
+    stair.vy = 0;
     stairs.push(stair);
     gameScene.addChild(stair);
   }
@@ -103,6 +107,9 @@ function setup(loader, resources) {
   logo.position.set(30, 30);
   overlay.addChild(logo);
 
+  setInterval(() => {
+    direction *= -1;
+  }, 1000);
 
   state = play;
   app.ticker.add(delta => {
@@ -110,12 +117,12 @@ function setup(loader, resources) {
   });
 }
 
-let direction = 1;
-setInterval(() => {
-  direction *= -1;
-}, 1000);
-
 const play = (delta) => {
+  stairs.forEach((stair) => {
+    if (stair.position.y !== gameScene.height - stair.height / 2) {
+      stair.position.y += stair.vy;
+    }
+  });
   continueButton.height += 0.2 * direction;
   continueButton.width += 0.4 * direction;
 };
@@ -144,8 +151,14 @@ const onClickMenu = (current_index) => (event) => {
     }
   });
   stairs.forEach((stair, index) => {
-    console.log(stair);
-    stair.visible = current_index + 1 === index;
+    if (current_index + 1 === index) {
+      stair.position.y -= 20;
+      stair.vy = 2;
+      stair.visible = true;
+    } else {
+      stair.visible = false;
+      stair.vy = 0;
+    }
   });
 };
 
