@@ -9,7 +9,7 @@ const app = new Application({
   antialias: true
 });
 
-let austin, logo, continueButton, overlay, hammer, menu, state, background, gameScene, finalScene;
+let austin, logo, continueButton, overlay, hammer, menu, state, background, gameScene, finalScene, previousIndex;
 let stairs = [], menu_items = [], direction = 1;
 
 app.loader.add('images/homescapes.json').add('final', 'images/background_final.png').load(setup);
@@ -48,6 +48,7 @@ function setup(loader, resources) {
   let items = 3, positions = [[0, 150], [135, 40], [300, 0]];
   for (let i = 0; i < items; i++) {
     let menu_item = new Container();
+    menu_item.alpha = 0;
     menu_item.interactive = true;
     menu_item.on('pointerdown', onClickMenu(i));
     menu_item.position.set(positions[i][0], positions[i][1]);
@@ -123,7 +124,19 @@ function setup(loader, resources) {
 
 const play = (delta) => {
   if (hammer.visible && hammer.alpha < 1) {
-    hammer.alpha += 0.05;
+    hammer.alpha += 0.1;
+  }
+
+  if (menu.visible) {
+    menu_items.forEach((item, index, array) => {
+      if (index > 0) {
+        if (array[index - 1].alpha >= 1) {
+          item.alpha += 0.1;
+        }
+      } else {
+        item.alpha += 0.1;
+      }
+    });
   }
 
   stairs.forEach((stair) => {
@@ -148,27 +161,30 @@ const onClickHammer = (event) => {
 };
 
 const onClickMenu = (currentIndex) => (event) => {
-  menu_items.forEach((item, index) => {
-    if (currentIndex !== index) {
-      item.children[0].visible = true;
-      item.children[1].visible = false;
-      item.children[2].visible = false;
-    } else {
-      item.children[0].visible = false;
-      item.children[1].visible = true;
-      item.children[2].visible = true;
-    }
-  });
-  stairs.forEach((stair, index) => {
-    if (currentIndex + 1 === index) {
-      stair.position.y -= 20;
-      stair.vy = 1.5;
-      stair.visible = true;
-    } else {
-      stair.visible = false;
-      stair.vy = 0;
-    }
-  });
+  if (previousIndex !== currentIndex) {
+    menu_items.forEach((item, index) => {
+      if (currentIndex !== index) {
+        item.children[0].visible = true;
+        item.children[1].visible = false;
+        item.children[2].visible = false;
+      } else {
+        item.children[0].visible = false;
+        item.children[1].visible = true;
+        item.children[2].visible = true;
+      }
+    });
+    stairs.forEach((stair, index) => {
+      if (currentIndex + 1 === index) {
+        stair.position.y -= 20;
+        stair.vy = 1.5;
+        stair.visible = true;
+      } else {
+        stair.visible = false;
+        stair.vy = 0;
+      }
+    });
+  }
+  previousIndex = currentIndex;
 };
 
 const onClickOk = (event) => {
