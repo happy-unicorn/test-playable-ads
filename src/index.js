@@ -9,9 +9,8 @@ const app = new Application({
   antialias: true
 });
 
-let austin, logo, continueButton, overlay, hammer, menu, stairs, state, background, gameScene, finalScene;
-let current = null, previous = null;
-let direction = 1;
+let austin, logo, continueButton, overlay, hammer, menu, state, background, gameScene, finalScene;
+let stairs = [], menu_items = [], direction = 1;
 
 app.loader.add('images/homescapes.json').add('final', 'images/background_final.png').load(setup);
 
@@ -28,8 +27,6 @@ function setup(loader, resources) {
   austin.anchor.set(0.5, 0.5);
   austin.position.set(gameScene.width - 500, gameScene.height / 2);
   gameScene.addChild(austin);
-
-  stairs = [];
 
   let names = ['old', 'new_1', 'new_2', 'new_3'];
   for (let name of names) {
@@ -73,6 +70,7 @@ function setup(loader, resources) {
     let menu_carpet = new Sprite(textures[`menu_carpet_${i + 1}.png`]);
     menu_item.addChild(menu_carpet);
 
+    menu_items.push(menu_item);
     menu.addChild(menu_item);
   }
 
@@ -80,6 +78,8 @@ function setup(loader, resources) {
   hammer.anchor.set(0.5, 0.5);
   hammer.position.set(gameScene.width - 280, gameScene.height / 2 + 80);
   hammer.interactive = true;
+  hammer.alpha = 0;
+  hammer.visible = false;
   hammer.on('pointerdown', onClickHammer);
   gameScene.addChild(hammer);
 
@@ -107,6 +107,10 @@ function setup(loader, resources) {
   logo.position.set(30, 30);
   overlay.addChild(logo);
 
+  setTimeout(() => {
+    hammer.visible = true;
+  }, 1000);
+
   setInterval(() => {
     direction *= -1;
   }, 1000);
@@ -118,11 +122,16 @@ function setup(loader, resources) {
 }
 
 const play = (delta) => {
+  if (hammer.visible && hammer.alpha < 1) {
+    hammer.alpha += 0.05;
+  }
+
   stairs.forEach((stair) => {
     if (stair.position.y !== gameScene.height - stair.height / 2) {
       stair.position.y += stair.vy;
     }
   });
+
   continueButton.height += 0.2 * direction;
   continueButton.width += 0.4 * direction;
 };
@@ -138,22 +147,22 @@ const onClickHammer = (event) => {
   menu.visible = true;
 };
 
-const onClickMenu = (current_index) => (event) => {
-  menu.children.forEach((item, index) => {
-    if(current_index === index) {
-      item.children[0].visible = false;
-      item.children[1].visible = true;
-      item.children[2].visible = true;
-    } else {
+const onClickMenu = (currentIndex) => (event) => {
+  menu_items.forEach((item, index) => {
+    if (currentIndex !== index) {
       item.children[0].visible = true;
       item.children[1].visible = false;
       item.children[2].visible = false;
+    } else {
+      item.children[0].visible = false;
+      item.children[1].visible = true;
+      item.children[2].visible = true;
     }
   });
   stairs.forEach((stair, index) => {
-    if (current_index + 1 === index) {
+    if (currentIndex + 1 === index) {
       stair.position.y -= 20;
-      stair.vy = 2;
+      stair.vy = 1.5;
       stair.visible = true;
     } else {
       stair.visible = false;
